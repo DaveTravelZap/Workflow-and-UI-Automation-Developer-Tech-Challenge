@@ -1,0 +1,61 @@
+.hs-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--hs-radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  font-family: var(--hs-font-family);
+  line-height: 1.2;
+}
+
+.hs-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hs-button--primary {
+  background-color: var(--hs-orange);
+  color: white;
+}
+
+.hs-button--primary:hover:not(:disabled) {
+  background-color: var(--hs-orange-light);
+}
+
+.hs-button--primary:active:not(:disabled) {
+  background-color: var(--hs-orange-dark);
+}
+
+.hs-button--secondary {
+  background-color: transparent;
+  border-color: var(--hs-orange);
+  color: var(--hs-orange);
+}
+
+.hs-button--secondary:hover:not(:disabled) {
+  background-color: rgba(255, 122, 89, 0.1);
+}
+
+.hs-button--tertiary {
+  background-color: transparent;
+  color: var(--hs-slate);
+  border-color: var(--hs-grey-300);
+}
+
+.hs-button--tertiary:hover:not(:disabled) {
+  background-color: var(--hs-grey-100);
+}
+
+.hs-button--danger {
+  background-color: var(--hs-danger);
+  color: white;
+}
+
+.hs-button--danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+}

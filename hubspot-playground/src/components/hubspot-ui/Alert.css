@@ -1,0 +1,37 @@
+.hs-alert {
+  padding: 16px;
+  border-radius: var(--hs-radius-md);
+  border-left: 4px solid transparent;
+  margin-bottom: 16px;
+  font-family: var(--hs-font-family);
+  font-size: 14px;
+}
+
+.hs-alert--info {
+  background-color: #e6f7ff;
+  border-left-color: var(--hs-info);
+  color: #004085;
+}
+
+.hs-alert--success {
+  background-color: #e6fffb;
+  border-left-color: var(--hs-success);
+  color: #00665c;
+}
+
+.hs-alert--warning {
+  background-color: #fffbe6;
+  border-left-color: var(--hs-warning);
+  color: #856404;
+}
+
+.hs-alert--danger {
+  background-color: #fff1f0;
+  border-left-color: var(--hs-danger);
+  color: #721c24;
+}
+
+.hs-alert-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}

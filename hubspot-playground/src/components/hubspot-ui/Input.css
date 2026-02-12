@@ -1,0 +1,45 @@
+.hs-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.hs-input-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hs-charcoal);
+}
+
+.hs-input {
+  padding: 8px 12px;
+  border: 1px solid var(--hs-grey-300);
+  border-radius: var(--hs-radius-sm);
+  font-family: var(--hs-font-family);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.hs-input:focus {
+  outline: none;
+  border-color: var(--hs-orange);
+}
+
+.hs-input:disabled {
+  background-color: var(--hs-grey-100);
+  cursor: not-allowed;
+}
+
+.hs-input--error .hs-input {
+  border-color: var(--hs-danger);
+}
+
+.hs-input-message {
+  font-size: 12px;
+  color: var(--hs-danger);
+}
+
+.hs-input-description {
+  font-size: 12px;
+  color: var(--hs-grey-500);
+}

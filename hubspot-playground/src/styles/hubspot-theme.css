@@ -1,0 +1,48 @@
+:root {
+  /* HubSpot Primary Colors */
+  --hs-orange: #ff7a59;
+  --hs-orange-light: #ff8f73;
+  --hs-orange-dark: #e56d4d;
+  
+  /* Neutral Colors */
+  --hs-charcoal: #33475b;
+  --hs-slate: #425b76;
+  --hs-grey-100: #f5f8fa;
+  --hs-grey-200: #eaf0f6;
+  --hs-grey-300: #cbd6e2;
+  --hs-grey-400: #99acc2;
+  --hs-grey-500: #7c98b6;
+  --hs-grey-600: #516f90;
+  
+  /* Semantic Colors */
+  --hs-success: #00a08e;
+  --hs-warning: #f5c26b;
+  --hs-danger: #f2545b;
+  --hs-info: #0091ae;
+  
+  /* Spacing */
+  --hs-space-1: 4px;
+  --hs-space-2: 8px;
+  --hs-space-3: 12px;
+  --hs-space-4: 16px;
+  --hs-space-5: 24px;
+  --hs-space-6: 32px;
+  
+  /* Shadows */
+  --hs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --hs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  /* Border Radius */
+  --hs-radius-sm: 3px;
+  --hs-radius-md: 5px;
+  
+  /* Typography */
+  --hs-font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--hs-font-family);
+  background-color: var(--hs-grey-100);
+  color: var(--hs-charcoal);
+}

@@ -1,0 +1,29 @@
+.playground-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--hs-grey-100);
+}
+
+.playground-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  overflow-y: auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-content {
+  width: 100%;
+  max-width: 600px;
+}
+
+.card-wrapper {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--hs-shadow-md);
+}
