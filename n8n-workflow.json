@@ -1,0 +1,178 @@
+{
+  "name": "My workflow 5",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "on-call-transcript-generated",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f7c70d45-f4c6-42dc-8ed3-7f23d0ed5d82",
+      "name": "Webhook",
+      "webhookId": "d48b84be-9610-4c1f-92d0-af761778ac06"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.transcription }}",
+        "options": {
+          "systemMessage": "=You are a data extraction agent. You will receive a call transcription and must extract the following properties into a structured JSON object.\n\n## Fields to Extract\n\n- **budget**: Classify into one of these HubSpot dropdown values: \"budget\", \"economy\", \"elevated\", \"luxury\". Infer from the lead's description of their budget expectations (e.g., \"middle of the road\" = \"elevated\", \"nothing fancy but better than economy\" supports \"elevated\").\n- **lead_name**: Full name of the lead/prospect (string).\n- **lead_email**: Email address of the lead (string). If not mentioned, return null.\n- **representative**: Full name of the company representative on the call (string).\n- **destinations**: Array of all destinations, regions, or specific resorts/properties mentioned as options (Array<string>).\n- **guest_count_range**: Classify into one of these HubSpot dropdown values: \"< 10\", \"10-20\", \"20-50\", \"50-100\", \"100+\". Use the numbers mentioned by the lead to select the best fitting range.\n- **adults_only**: Whether the lead expressed preference for an adults-only venue (bool). Default to false if not explicitly mentioned.\n- **flights_needed**: Whether the lead expects flights to be included in the package (bool). If the lead explicitly excludes flights, return false. Default to true if not mentioned.\n\n## Rules\n\n1. Extract ONLY from what is explicitly stated or strongly implied in the transcription.\n2. If a field cannot be determined from the conversation, return null.\n3. For dropdown fields (budget, guest_count_range), pick the closest matching option based on context clues.\n4. Return ONLY valid JSON with no additional text, preamble, or markdown formatting.\n\n## Output Format\n\n{\n  \"budget\": string | null,\n  \"lead_name\": string | null,\n  \"lead_email\": string | null,\n  \"representative\": string | null,\n  \"destinations\": string[],\n  \"guest_count_range\": string | null,\n  \"adults_only\": boolean,\n  \"flights_needed\": boolean\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5bb2d33b-4fd4-447f-968a-dda55d862e58",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_schema",
+              "schema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"title\": \"CallTranscriptionExtraction\",\n  \"description\": \"Extracted lead data from a sales call transcription\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"budget\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\"budget\", \"economy\", \"elevated\", \"luxury\", null],\n      \"description\": \"Budget classification based on lead's expectations\"\n    },\n    \"lead_name\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Full name of the lead/prospect\"\n    },\n    \"lead_email\": {\n      \"type\": [\"string\", \"null\"],\n      \"format\": \"email\",\n      \"description\": \"Email address of the lead\"\n    },\n    \"representative\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Full name of the company representative on the call\"\n    },\n    \"destinations\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"default\": [],\n      \"description\": \"All destinations, regions, or specific resorts mentioned as options\"\n    },\n    \"guest_count_range\": {\n      \"type\": [\"string\", \"null\"],\n      \"enum\": [\"< 10\", \"10-20\", \"20-50\", \"50-100\", \"100+\", null],\n      \"description\": \"Guest count classified into the closest HubSpot dropdown range\"\n    },\n    \"adults_only\": {\n      \"type\": \"boolean\",\n      \"default\": false,\n      \"description\": \"Whether the lead prefers an adults-only venue\"\n    },\n    \"flights_needed\": {\n      \"type\": \"boolean\",\n      \"default\": true,\n      \"description\": \"Whether the lead expects flights included in the package\"\n    }\n  },\n  \"required\": [\n    \"budget\",\n    \"lead_name\",\n    \"lead_email\",\n    \"representative\",\n    \"destinations\",\n    \"guest_count_range\",\n    \"adults_only\",\n    \"flights_needed\"\n  ],\n  \"additionalProperties\": false\n}"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        208
+      ],
+      "id": "c90dd0af-b67d-4bde-81e1-6d1f6357506a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "C6U0aYHc8q5oXxQr",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        512,
+        0
+      ],
+      "id": "810b83ef-dd91-4bfe-a866-58cdcc2a87f2",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "webhooks.lvisentin.online",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+            "content-length": "2783",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9,pt;q=0.8",
+            "content-type": "application/json",
+            "origin": "http://localhost:5173",
+            "priority": "u=1, i",
+            "referer": "http://localhost:5173/",
+            "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "181.214.150.75",
+            "x-forwarded-host": "webhooks.lvisentin.online",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "3061ae1fd53b",
+            "x-real-ip": "181.214.150.75"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "date": "2026-02-12T11:15:00",
+            "lead_contact": "Cindy Gardner",
+            "transcription": "Robin Everman: Thank you for calling, this is Robin Everman with Destify. I see you're interested in our destination wedding services. Could you tell me a little bit about what you're dreaming of?\n\nCindy Gardner: Hi, yes, thank you. My fiancé and I are looking to get married sometime next year, around late spring or early summer, and we really want a destination wedding. We've been looking at places in the Caribbean, maybe Mexico, but we're open to suggestions!\n\nRobin Everman: That sounds lovely! Late spring/early summer is a beautiful time of year for a tropical wedding. So, for the date, is there a specific month you're leaning toward, like maybe May or June?\n\nCindy Gardner: We're thinking early June is ideal. We're a bit flexible though, maybe a week or two either way.\n\nRobin Everman: Got it. And what about the size of the wedding? Do you have an estimate for your guest count?\n\nCindy Gardner: We're hoping for something intimate, maybe 30 to 50 guests, including us.\n\nRobin Everman: Intimate weddings are our specialty. That size gives us a lot of flexibility with venue selection. Now, let's talk location. You mentioned the Caribbean and Mexico. Are there any must-haves for the location? For example, are you looking for a resort that is adults-only, family-friendly, or a private villa?\n\nCindy Gardner: We're hoping for something with a great beach for the ceremony, but maybe a private feel for the reception. We'd prefer an adults-only resort or a private villa if possible. Somewhere with good food and activities for the guests would be a plus.\n\nRobin Everman: Excellent. We have a few properties that fit that description perfectly, including Place in Riviera Maya and Place in Jamaica. Are you interested in reviewing a preliminary package for either of those?\n\nCindy Gardner: Yes, definitely. I'd love to see what you offer.\n\nRobin Everman: Wonderful. Lastly, do you have a tentative budget range in mind for the entire planning and execution? This helps us narrow down the best options immediately.\n\nCindy Gardner: We don't have an exact range in mind, but we're middle of the road. Nothing too fancy, but better than economy.. not including flights for the guests.\n\nRobin Everman: Thank you for sharing that. I will put together a preliminary proposal featuring 2-3 tailored options, including the locations we discussed. I'll send it over to you by the end of the day, and then we can schedule a follow-up call to review it. How does that sound?\n\nCindy Gardner: That sounds great, thank you so much!\n\nRobin Everman: My pleasure. You'll receive the proposal in an email. I'll include a link to schedule our next call there too. Have a great day."
+          },
+          "webhookUrl": "https://webhooks.lvisentin.online/webhook/on-call-transcript-generated",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b3ea5f4a-3fd7-4eb7-8317-e431c47210d0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3a7eccb7f6063ad80872bd57ec0e3a8a318e197af16f054e88f9f21acef3c945"
+  },
+  "id": "zBC-EogNTFbjXoLGDZjoR",
+  "tags": []
+}
