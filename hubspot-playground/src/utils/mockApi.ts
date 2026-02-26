@@ -1,53 +1,87 @@
-export interface HubSpotWebhookEvent {
-  callbackId: string;
-  origin: {
-    portalId: number;
-    actionDefinitionId: string;
-    actionDefinitionVersion: number;
-  };
-  object: {
-    objectId: number;
-    objectType: string;
-    properties: Record<string, any>;
-  };
-  fields: Record<string, any>;
+import { transcript } from '../data/transcript.ts';
+
+export interface WebhookOutput {
+  budget: string;
+  lead_name: string;
+  lead_contact: string;
+  representative: string;
+  destinations: string[];
+  guest_count_range: string;
+  adults_only: boolean;
+  flights_needed: boolean;
 }
 
-export const mockHubSpotWebhook: HubSpotWebhookEvent = {
-  callbackId: 'cb-123456789',
-  origin: {
-    portalId: 9876543,
-    actionDefinitionId: 'custom-automation-action',
-    actionDefinitionVersion: 1,
-  },
-  object: {
-    objectId: 101,
-    objectType: 'CONTACT',
-    properties: {
-      firstname: 'Brian',
-      lastname: 'Halligan',
-      email: 'brian@hubspot.com',
-      company: 'HubSpot',
-    },
-  },
-  fields: {
-    sync_priority: 'high',
-  },
+export interface WebhookResponse {
+  success: boolean;
+  data?: WebhookOutput;
+  error?: string;
+}
+
+export const triggerWebhook = async (
+  onProgress: (percent: number) => void
+): Promise<WebhookResponse> => {
+  const webhookUrl = import.meta.env.VITE_WEBHOOK_URL;
+
+  if (!webhookUrl) {
+    throw new Error('VITE_WEBHOOK_URL is not defined in environment variables');
+  }
+
+  onProgress(0);
+
+  // This is for simulating the progress of the API Call
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress = Math.min(progress + 10, 90);
+    onProgress(progress);
+  }, 1000);
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(transcript),
+    });
+
+    clearInterval(interval);
+    onProgress(100);
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: `Webhook returned ${response.status}: ${response.statusText}`,
+      };
+    }
+
+    const data = await response.json().catch(() => null);
+    return { success: true, data };
+  } catch (err: any) {
+    clearInterval(interval);
+    onProgress(0);
+    return { success: false, error: err.message };
+  }
 };
 
-export const simulateWorkflowAction = (onProgress: (percent: number) => void): Promise<HubSpotWebhookEvent> => {
-  return new Promise((resolve) => {
-    let progress = 0;
-    onProgress(0);
+export const simulateError = async (
+  onProgress: (percent: number) => void
+): Promise<WebhookResponse> => {
+  onProgress(0);
 
-    const interval = setInterval(() => {
-      progress += 20;
-      onProgress(progress);
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress = Math.min(progress + 20, 60);
+    onProgress(progress);
+  }, 400);
 
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => resolve(mockHubSpotWebhook), 500);
-      }
-    }, 1000); // Update every 1 second for 5 seconds
-  });
+  // Simulate a short delay then fail
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  clearInterval(interval);
+  onProgress(0);
+
+  return {
+    success: false,
+    error: 'Connection refused: the remote server did not respond (simulated error)',
+  };
 };

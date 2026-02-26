@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Heading, Text, Flex, Button, Badge, Stack, Alert, ProgressBar } from './hubspot-ui';
+import type { WebhookResponse } from '../utils/mockApi';
 
 interface CustomCardProps {
   title: string;
@@ -12,7 +13,8 @@ interface CustomCardProps {
   progressLabel?: string;
   isProcessing?: boolean;
   onTrigger: () => void;
-  webhookData?: any;
+  onTriggerError: () => void;
+  webhookData?: WebhookResponse | null;
 }
 
 export const CustomCard: React.FC<CustomCardProps> = ({
@@ -26,6 +28,7 @@ export const CustomCard: React.FC<CustomCardProps> = ({
   progressLabel = 'Last Sync Status',
   isProcessing = false,
   onTrigger,
+  onTriggerError,
   webhookData,
 }) => {
   return (
@@ -45,25 +48,41 @@ export const CustomCard: React.FC<CustomCardProps> = ({
           </Alert>
         )}
 
-        {webhookData ? (
+        {webhookData?.success  && webhookData.data ? (
           <Box padding="medium" style={{ backgroundColor: 'var(--hs-grey-100)', borderRadius: '8px', border: '1px solid var(--hs-grey-200)' }}>
              <Text variant="caption" style={{ fontWeight: 600, marginBottom: '12px', display: 'block' }}>RECEIVED WEBHOOK DATA</Text>
              <Stack gap="small">
                 <Flex direction="row" justify="between">
-                   <Text variant="micro" style={{ fontWeight: 600 }}>Callback ID:</Text>
-                   <Text variant="micro">{webhookData.callbackId}</Text>
-                </Flex>
-                <Flex direction="row" justify="between">
-                   <Text variant="micro" style={{ fontWeight: 600 }}>Object ID:</Text>
-                   <Text variant="micro">{webhookData.object.objectId}</Text>
-                </Flex>
-                <Flex direction="row" justify="between">
-                   <Text variant="micro" style={{ fontWeight: 600 }}>Contact:</Text>
-                   <Text variant="micro">{webhookData.object.properties.firstname} {webhookData.object.properties.lastname}</Text>
+                   <Text variant="micro" style={{ fontWeight: 600 }}>Lead Name:</Text>
+                   <Text variant="micro">{webhookData.data.lead_name}</Text>
                 </Flex>
                 <Flex direction="row" justify="between">
                    <Text variant="micro" style={{ fontWeight: 600 }}>Email:</Text>
-                   <Text variant="micro">{webhookData.object.properties.email}</Text>
+                   <Text variant="micro">{webhookData.data.lead_contact ?? 'N/A'}</Text>
+                </Flex>
+                <Flex direction="row" justify="between">
+                   <Text variant="micro" style={{ fontWeight: 600 }}>Representative:</Text>
+                   <Text variant="micro">{webhookData.data.representative}</Text>
+                </Flex>
+                <Flex direction="row" justify="between">
+                   <Text variant="micro" style={{ fontWeight: 600 }}>Budget:</Text>
+                   <Text variant="micro">{webhookData.data.budget}</Text>
+                </Flex>
+                <Flex direction="row" justify="between">
+                   <Text variant="micro" style={{ fontWeight: 600 }}>Guest Count:</Text>
+                   <Text variant="micro">{webhookData.data.guest_count_range}</Text>
+                </Flex>
+                <Flex direction="row" justify="between">
+                   <Text variant="micro" style={{ fontWeight: 600 }}>Destinations:</Text>
+                   <Text variant="micro">{webhookData.data.destinations.join(', ')}</Text>
+                </Flex>
+                <Flex direction="row" justify="between">
+                   <Text variant="micro" style={{ fontWeight: 600 }}>Adults Only:</Text>
+                   <Text variant="micro">{webhookData.data.adults_only ? 'Yes' : 'No'}</Text>
+                </Flex>
+                <Flex direction="row" justify="between">
+                   <Text variant="micro" style={{ fontWeight: 600 }}>Flights Needed:</Text>
+                   <Text variant="micro">{webhookData.data.flights_needed ? 'Yes' : 'No'}</Text>
                 </Flex>
              </Stack>
           </Box>
@@ -83,31 +102,38 @@ export const CustomCard: React.FC<CustomCardProps> = ({
         )}
 
         <Box>
-           <ProgressBar 
-             label={progressLabel} 
-             value={progressValue} 
-             variant={progressValue === 100 ? 'success' : 'info'} 
-             showPercentage 
-             style={{ marginBottom: '16px' }} 
+           <ProgressBar
+             label={progressLabel}
+             value={progressValue}
+             variant={progressValue === 100 ? 'success' : webhookData?.error ? 'danger' : 'info'}
+             showPercentage
+             style={{ marginBottom: '16px' }}
            />
            <Text variant="caption" style={{ fontWeight: 600, marginBottom: '8px', display: 'block' }}>Recent Activity</Text>
            <Stack gap="small">
               <Flex direction="row" gap="small" align="center">
-                 <Box style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: progressValue === 100 ? 'var(--hs-success)' : 'var(--hs-info)' }} />
+                 <Box style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: webhookData?.error ? 'var(--hs-danger)' : progressValue === 100 ? 'var(--hs-success)' : 'var(--hs-info)' }} />
                  <Text variant="micro">
-                    {progressValue === 100 ? 'Sync completed successfully' : isProcessing ? 'Synchronizing with external service...' : 'System ready for webhook trigger'}
+                    {webhookData?.error ? 'Webhook request failed' : progressValue === 100 ? 'Sync completed successfully' : isProcessing ? 'Synchronizing with external service...' : 'System ready for webhook trigger'}
                  </Text>
               </Flex>
            </Stack>
         </Box>
 
         <Flex direction="row" gap="small" style={{ marginTop: '8px', paddingTop: '16px', borderTop: '1px solid var(--hs-grey-200)' }}>
-          <Button 
-            variant="primary" 
-            onClick={onTrigger} 
+          <Button
+            variant="primary"
+            onClick={onTrigger}
             disabled={isProcessing}
           >
             {isProcessing ? 'Processing...' : 'Trigger Workflow Webhook Event'}
+          </Button>
+          <Button
+            variant="danger"
+            onClick={onTriggerError}
+            disabled={isProcessing}
+          >
+            Simulate Error
           </Button>
         </Flex>
       </Stack>
